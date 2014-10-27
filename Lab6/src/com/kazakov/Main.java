@@ -8,45 +8,43 @@ import java.util.Random;
 public class Main {
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
-        System.out.println(primeTest(GetPrimeNumber()));
+        BigInteger temp = GetPrimeNumber();
+        while(!isPrime(temp, 20)) {
+            temp = GetPrimeNumber();
+        }
+        System.out.println(temp);
     }
 
-    public static boolean primeTest(BigInteger w) {
-        int i = 0;
-        int n = 50 + (int) Math.round(Math.random() * 50);
-        BigInteger m;
-        BigInteger wView = w.subtract(BigInteger.ONE);
-        int a = 0;
-        BigInteger wTemp = wView;
-        while (wTemp.mod(BigInteger.ONE.add(BigInteger.ONE)) == BigInteger.ZERO) {
-            wTemp = wTemp.divide(BigInteger.ONE.add(BigInteger.ONE));
-            a++;
-        }
-        m = wTemp;
+    public static boolean isPrime(BigInteger m, int r) {
+        BigInteger t = m.subtract(BigInteger.ONE);
+        BigInteger two = BigInteger.ONE.add(BigInteger.ONE);
 
-        while(i < n) {
-            // Step 3
-            BigInteger b = rndBigInt(w);
-            // Step 4
-            int j = 0;
-            BigInteger z = BIpow(b, m).mod(w);
-
-            while(j < a) {
-                // Step 5
-                if ((j == 0 && z.equals(BigInteger.ONE)) || z.equals(wView)) {
-                    break;
-                }
-                // Step 6
-                if (j > 0 && z.equals(BigInteger.ONE)) {
-                    return false; // Step 8
-                }
-                // Step 7
-                j++;
-                if (j >= a)
-                    return false;
-                z = z.pow(2).mod(w);
+        int s = 0;
+        if(t.mod(two).equals(BigInteger.ZERO)) {
+            while (t.mod(two).equals(BigInteger.ZERO)) {
+                t = t.divide(two);
+                s++;
             }
-            i++;
+        }
+
+        for(int i = 0; i < r; i++) {
+            BigInteger a = rndBigInt(m.subtract(two));
+            BigInteger x = a.modPow(t,m);
+            if(!x.equals(BigInteger.ONE) && !x.equals(m.subtract(BigInteger.ONE))) {
+                int j = 0;
+                boolean flag = true;
+                while(j < s - 1) {
+                    x = x.multiply(x).mod(m);
+                    if(x.equals(BigInteger.ONE))
+                        return false;
+                    if(x.equals(m.subtract(BigInteger.ONE))) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag)
+                    return false;
+            }
         }
 
         return true;
@@ -56,19 +54,9 @@ public class Main {
         Random rnd = new Random();
         do {
             BigInteger i = new BigInteger(max.bitLength(), rnd);
-            if (i.compareTo(max) < 0)
+            if (i.compareTo(max) < 0 && i.compareTo(BigInteger.ONE) > 0)
                 return i;
         } while (true);
-    }
-
-    public static BigInteger BIpow(BigInteger base, BigInteger exponent) {
-        BigInteger result = BigInteger.ONE;
-        while (exponent.signum() > 0) {
-            if (exponent.testBit(0)) result = result.multiply(base);
-            base = base.multiply(base);
-            exponent = exponent.shiftRight(1);
-        }
-        return result;
     }
 
     static String sha1(String input) throws NoSuchAlgorithmException {
@@ -82,17 +70,17 @@ public class Main {
         return sb.toString();
     }
 
-    public static int GetSEED(int length) {
+    public static BigInteger GetSEED(int length) {
         byte[] b = new byte[length];
         new Random().nextBytes(b);
-        return new BigInteger(b).intValue();
+        return new BigInteger(b);
     }
 
     public static BigInteger GetPrimeNumber() throws NoSuchAlgorithmException {
         int byteSize = 20;
         int g = byteSize*8;
 
-        BigInteger SEED = BigInteger.valueOf(GetSEED(byteSize));
+        BigInteger SEED = GetSEED(byteSize);
         BigInteger nSEED = SEED.add(BigInteger.ONE);
         BigInteger devider = BigInteger.valueOf((long) Math.pow(2,g));
         BigInteger max = BigInteger.valueOf((long) Math.pow(2,g-1));
@@ -104,6 +92,7 @@ public class Main {
         BigInteger U = SEED_sha.xor(nSEED_sha);
 
         // Step 3
+
         BigInteger q = U.or(BigInteger.ONE).or(max);
         return q;
     }
