@@ -21,7 +21,7 @@ public class Algoritm {
         this.p = M.nextProbablePrime();
         Сoprime(p);
 
-        int r = (int) (Math.random() * 100 + 1);
+        int r = (int) (Math.random() * 10000000 + 1);
 
         M_new = M.add(p.multiply(BigInteger.valueOf(r)));
 
@@ -36,6 +36,9 @@ public class Algoritm {
 
     // китайская теорема об остатках
     public BigInteger restoreSecret() {
+        System.out.println("Restoring K="+K);
+        K = K-1;
+        System.out.println("Restoring K="+K);
         System.out.println("STEP1");
         // Step 1
         BigInteger M1 = d[0];
